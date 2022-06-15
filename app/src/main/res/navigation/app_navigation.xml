@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/app_navigation"
+    app:startDestination="@id/homeCharacterFragment">
+
+    <fragment
+        android:id="@+id/homeCharacterFragment"
+        android:name="com.agesadev.disney.ui.home.HomeCharacterFragment"
+        android:label="fragment_home_character"
+        tools:layout="@layout/fragment_home_character">
+        <action
+            android:id="@+id/action_homeCharacterFragment_to_characterDetailsFragment"
+            app:destination="@id/characterDetailsFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/characterDetailsFragment"
+        android:name="com.agesadev.disney.ui.detail.CharacterDetailsFragment"
+        android:label="fragment_character_details"
+        tools:layout="@layout/fragment_character_details" />
+</navigation>
