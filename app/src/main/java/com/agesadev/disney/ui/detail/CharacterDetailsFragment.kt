@@ -29,6 +29,9 @@ class CharacterDetailsFragment : Fragment() {
     private lateinit var gamesList: TextView
     private lateinit var characterImageDetail: ImageView
 
+    //emoji2 setup
+    private lateinit var characterEmoji: TextView
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -89,7 +92,12 @@ class CharacterDetailsFragment : Fragment() {
 
     private fun displayVideoGames(videoGames: String?) {
         if (videoGames.isNullOrEmpty()) {
-            gamesList.text = "No Video Games"
+//            gamesList.text = "No Video Games"
+//            display text to show No games and also a sad emoji
+            gamesList.text = "No Video Games \uD83D\uDE22"
+            //sad emoji
+
+
         } else {
             gamesList.text = videoGames.split(",").joinToString("\n") {
                 "- $it"
@@ -100,7 +108,7 @@ class CharacterDetailsFragment : Fragment() {
 
     private fun displayMovieFilms(movieFilms: String?) {
         if (movieFilms.isNullOrEmpty()) {
-            moviesList.text = "No TV Shows"
+            moviesList.text = "No TV Shows \uD83D\uDE22"
         } else {
             moviesList.text = movieFilms.split(",").joinToString("\n") {
                 "- $it"
