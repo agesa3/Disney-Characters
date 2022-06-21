@@ -29,10 +29,6 @@ class CharacterDetailsFragment : Fragment() {
     private lateinit var gamesList: TextView
     private lateinit var characterImageDetail: ImageView
 
-    //emoji2 setup
-    private lateinit var characterEmoji: TextView
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         detailsViewModel = ViewModelProvider(this).get(CharacterDetailsViewModel::class.java)
@@ -81,7 +77,6 @@ class CharacterDetailsFragment : Fragment() {
             .transition(DrawableTransitionOptions.withCrossFade())
             .into(characterImageDetail)
     }
-
     private fun setUpViews(characterDetailView: View) {
         characterDetailToolbar = characterDetailView.findViewById(R.id.characterDetailToolbar)
         characterNameDeail = characterDetailView.findViewById(R.id.characterNameDeail)
@@ -92,11 +87,7 @@ class CharacterDetailsFragment : Fragment() {
 
     private fun displayVideoGames(videoGames: String?) {
         if (videoGames.isNullOrEmpty()) {
-//            gamesList.text = "No Video Games"
-//            display text to show No games and also a sad emoji
             gamesList.text = "No Video Games \uD83D\uDE22"
-            //sad emoji
-
 
         } else {
             gamesList.text = videoGames.split(",").joinToString("\n") {

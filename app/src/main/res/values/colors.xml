@@ -11,6 +11,7 @@
 
     <color name="primary">#FFFFFFFF</color>
     <color name="background_color">#F3F9FF</color>
+    <color name="shimmer_background">#dddddd</color>
 
 
 

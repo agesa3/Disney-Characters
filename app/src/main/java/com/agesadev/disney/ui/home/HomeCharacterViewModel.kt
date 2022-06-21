@@ -12,8 +12,7 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 @HiltViewModel
-class HomeCharacterViewModel @Inject constructor(private val getAllCharactersUseCase: GetAllCharactersUseCase) :
-    ViewModel() {
+class HomeCharacterViewModel @Inject constructor(private val getAllCharactersUseCase: GetAllCharactersUseCase) : ViewModel() {
     private val characterList = MutableLiveData<PagingData<Character>>()
 
     init {

@@ -16,6 +16,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.agesadev.disney.R
 import com.agesadev.disney.domain.model.Character
 import com.agesadev.disney.utils.CharacterItemClick
+import com.agesadev.disney.utils.Resource
+import com.facebook.shimmer.ShimmerFrameLayout
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
@@ -27,32 +29,47 @@ class HomeCharacterFragment : Fragment(), CharacterItemClick {
     private lateinit var homeCharacterRecyclerView: RecyclerView
     private lateinit var homeCharacterAdapter: CharacterRecyclerAdapter
     private lateinit var homeCharacterFragmentViewModel: HomeCharacterViewModel
-    private var mJob: Job? = null
+    private lateinit var shimmerContainer: ShimmerFrameLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
     }
-
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        mJob?.cancel()
         homeCharacterFragmentViewModel = ViewModelProvider(this)[HomeCharacterViewModel::class.java]
+        shimmerContainer = view.findViewById(R.id.shimmer_view_container)
 
-        mJob = viewLifecycleOwner.lifecycleScope.launch {
+        displayCharacters()
+
+    }
+
+    private fun displayCharacters() {
+        viewLifecycleOwner.lifecycleScope.launch {
             homeCharacterFragmentViewModel.getCharacters().collect { resources ->
-                resources.data?.let {
-                    resources.data?.let { data ->
-                        data.collect {
-                            homeCharacterAdapter.submitData(it)
+                when (resources) {
+                    is Resource.Loading -> {
+                        Log.d("HomeCharacterFragment", "Loading")
+                    }
+                    is Resource.Success -> {
+                        Log.d("HomeCharacterFragment", "Success")
+                        resources.data?.let { data ->
+                            data.collect {
+                                homeCharacterAdapter.submitData(it)
+                                shimmerContainer.stopShimmer()
+                                shimmerContainer.visibility = View.GONE
+                            }
                         }
                     }
+                    is Resource.Error -> {
+                        Log.d("HomeCharacterFragment", "Error")
+                        Toast.makeText(context, resources.message, Toast.LENGTH_LONG).show()
+                        shimmerContainer.startShimmer()
+                        shimmerContainer.visibility = View.VISIBLE
+                    }
                 }
-
             }
         }
-
     }
 
     override fun onCreateView(
@@ -60,14 +77,16 @@ class HomeCharacterFragment : Fragment(), CharacterItemClick {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        val homeCharacterView = inflater.inflate(R.layout.fragment_home_character, container, false)
+        val homeCharacterView =
+            inflater.inflate(R.layout.fragment_home_character, container, false)
         setUpRecyclerView(homeCharacterView)
 
         return homeCharacterView
     }
 
     private fun setUpRecyclerView(homeCharacterView: View) {
-        homeCharacterRecyclerView = homeCharacterView.findViewById(R.id.homeCharacterRecyclerView)
+        homeCharacterRecyclerView =
+            homeCharacterView.findViewById(R.id.homeCharacterRecyclerView)
         homeCharacterAdapter = CharacterRecyclerAdapter(this)
         homeCharacterRecyclerView.apply {
             layoutManager = LinearLayoutManager(context)
@@ -95,4 +114,16 @@ class HomeCharacterFragment : Fragment(), CharacterItemClick {
         return disneyCharacterUrl
     }
 
+
+    override fun onResume() {
+        shimmerContainer.startShimmer()
+        super.onResume()
+
+    }
+
+    override fun onPause() {
+        shimmerContainer.stopShimmer()
+        super.onPause()
+
+    }
 }
