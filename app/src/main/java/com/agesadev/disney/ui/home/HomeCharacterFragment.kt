@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.agesadev.disney.R
@@ -24,7 +25,6 @@ import kotlinx.coroutines.launch
 class HomeCharacterFragment : Fragment(), CharacterItemClick {
 
     private lateinit var homeCharacterRecyclerView: RecyclerView
-    private val disneyCharacters = arrayListOf<Character>()
     private lateinit var homeCharacterAdapter: CharacterRecyclerAdapter
     private lateinit var homeCharacterFragmentViewModel: HomeCharacterViewModel
     private var mJob: Job? = null
@@ -38,11 +38,9 @@ class HomeCharacterFragment : Fragment(), CharacterItemClick {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         mJob?.cancel()
-        homeCharacterFragmentViewModel =
-            ViewModelProvider(this).get(HomeCharacterViewModel::class.java)
+        homeCharacterFragmentViewModel = ViewModelProvider(this)[HomeCharacterViewModel::class.java]
 
         mJob = viewLifecycleOwner.lifecycleScope.launch {
-
             homeCharacterFragmentViewModel.getCharacters().collect { resources ->
                 resources.data?.let {
                     resources.data?.let { data ->
@@ -63,19 +61,38 @@ class HomeCharacterFragment : Fragment(), CharacterItemClick {
     ): View? {
         // Inflate the layout for this fragment
         val homeCharacterView = inflater.inflate(R.layout.fragment_home_character, container, false)
+        setUpRecyclerView(homeCharacterView)
+
+        return homeCharacterView
+    }
+
+    private fun setUpRecyclerView(homeCharacterView: View) {
         homeCharacterRecyclerView = homeCharacterView.findViewById(R.id.homeCharacterRecyclerView)
         homeCharacterAdapter = CharacterRecyclerAdapter(this)
         homeCharacterRecyclerView.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = homeCharacterAdapter
         }
-
-        return homeCharacterView
     }
 
     override fun clickedCharacter(character: Character) {
-        Toast.makeText(requireContext(), "I was clicked", Toast.LENGTH_SHORT).show()
-        Log.d("Click", "clickedCharacter:clicked")
+        Log.d("Click", "clickedCharacter:clicked ${character.id}")
+        val characterId: Bundle = passCharacterUrl(character)
+        navigateToCharacterDetails(characterId)
+
+    }
+
+    private fun navigateToCharacterDetails(disneyCharacterUrl: Bundle) {
+        Navigation.findNavController(homeCharacterRecyclerView).navigate(
+            R.id.action_homeCharacterFragment_to_characterDetailsFragment,
+            disneyCharacterUrl
+        )
+    }
+
+    private fun passCharacterUrl(character: Character): Bundle {
+        val disneyCharacterUrl: Bundle = Bundle()
+        disneyCharacterUrl.putInt("character_id", character.id)
+        return disneyCharacterUrl
     }
 
 }
