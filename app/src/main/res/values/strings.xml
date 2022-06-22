@@ -6,4 +6,5 @@
     <string name="list_of_movies">List of Movies</string>
     <string name="movies">Movies</string>
     <string name="iron_man">Iron Man</string>
+    <string name="check_internet">Check Internet Connection</string>
 </resources>

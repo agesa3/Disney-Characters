@@ -31,4 +31,6 @@ object NetworkModule {
         return retrofit.create(CharacterApi::class.java)
     }
 
+
+
 }

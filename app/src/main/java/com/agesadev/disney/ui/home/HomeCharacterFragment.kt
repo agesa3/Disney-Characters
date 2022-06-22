@@ -20,6 +20,7 @@ import com.agesadev.disney.utils.Resource
 import com.facebook.shimmer.ShimmerFrameLayout
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -62,21 +63,26 @@ class HomeCharacterFragment : Fragment(), CharacterItemClick {
                         }
                     }
                     is Resource.Error -> {
-                        Log.d("HomeCharacterFragment", "Error")
-                        Toast.makeText(context, resources.message, Toast.LENGTH_LONG).show()
                         shimmerContainer.startShimmer()
                         shimmerContainer.visibility = View.VISIBLE
+                        Log.d("HomeCharacterFragment", "Error")
+                        Toast.makeText(
+                            context,
+                            getString(R.string.check_internet),
+                            Toast.LENGTH_LONG
+                        )
+                            .show()
                     }
                 }
             }
         }
+
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         val homeCharacterView =
             inflater.inflate(R.layout.fragment_home_character, container, false)
         setUpRecyclerView(homeCharacterView)
@@ -116,14 +122,14 @@ class HomeCharacterFragment : Fragment(), CharacterItemClick {
 
 
     override fun onResume() {
-        shimmerContainer.startShimmer()
         super.onResume()
+        shimmerContainer.startShimmer()
 
     }
 
     override fun onPause() {
-        shimmerContainer.stopShimmer()
         super.onPause()
+        shimmerContainer.stopShimmer()
 
     }
 }
