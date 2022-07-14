@@ -132,4 +132,6 @@ class HomeCharacterFragment : Fragment(), CharacterItemClick {
         shimmerContainer.stopShimmer()
 
     }
+
+
 }
