@@ -1,6 +1,5 @@
 package com.agesadev.disney.ui.home
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -35,7 +34,6 @@ class HomeCharacterViewModel @Inject constructor(private val getAllCharactersUse
                         _character.value = CharacterState(isLoading = true)
                     }
                     is Resource.Success -> {
-//                        Log.d("Home", "Data at viewmodel: ${result.data?.first()}")
                         _character.value =
                             CharacterState(isLoading = false, data = result.data?.first())
                     }
@@ -45,7 +43,7 @@ class HomeCharacterViewModel @Inject constructor(private val getAllCharactersUse
                     }
                 }
 
-            }
+            }.launchIn(viewModelScope)
 
         }
     }

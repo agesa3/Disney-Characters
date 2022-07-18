@@ -99,10 +99,12 @@ class HomeCharacterFragment : Fragment(), CharacterItemClick {
     }
 
     private fun navigateToCharacterDetails(disneyCharacterUrl: Bundle) {
-        Navigation.findNavController(homeCharacterRecyclerView).navigate(
-            R.id.action_homeCharacterFragment_to_characterDetailsFragment,
-            disneyCharacterUrl
-        )
+        binding?.let {
+            Navigation.findNavController(it.homeCharacterRecyclerView).navigate(
+                R.id.action_homeCharacterFragment_to_characterDetailsFragment,
+                disneyCharacterUrl
+            )
+        }
     }
 
     private fun passCharacterUrl(character: Character): Bundle {
