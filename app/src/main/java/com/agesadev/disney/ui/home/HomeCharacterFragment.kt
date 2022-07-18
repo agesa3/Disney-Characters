@@ -6,31 +6,30 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.*
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.agesadev.disney.R
+import com.agesadev.disney.databinding.FragmentHomeCharacterBinding
 import com.agesadev.disney.domain.model.Character
 import com.agesadev.disney.utils.CharacterItemClick
-import com.agesadev.disney.utils.Resource
 import com.facebook.shimmer.ShimmerFrameLayout
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class HomeCharacterFragment : Fragment(), CharacterItemClick {
 
+    private var _binding: FragmentHomeCharacterBinding? = null
+    private val binding get() = _binding
+
     private lateinit var homeCharacterRecyclerView: RecyclerView
     private lateinit var homeCharacterAdapter: CharacterRecyclerAdapter
     private lateinit var homeCharacterFragmentViewModel: HomeCharacterViewModel
     private lateinit var shimmerContainer: ShimmerFrameLayout
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,61 +39,53 @@ class HomeCharacterFragment : Fragment(), CharacterItemClick {
         super.onViewCreated(view, savedInstanceState)
         homeCharacterFragmentViewModel = ViewModelProvider(this)[HomeCharacterViewModel::class.java]
         shimmerContainer = view.findViewById(R.id.shimmer_view_container)
-
-        displayCharacters()
+        setUpRecyclerView()
+        observeAndDisplayCharacters()
 
     }
 
-    private fun displayCharacters() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            homeCharacterFragmentViewModel.getCharacters().collect { resources ->
-                when (resources) {
-                    is Resource.Loading -> {
-                        Log.d("HomeCharacterFragment", "Loading")
+//    private fun displayCharacters() {
+//        viewLifecycleOwner.lifecycleScope.launch {
+//            homeCharacterFragmentViewModel.characterList.observe(
+//                viewLifecycleOwner
+//            ) {
+//
+//            }
+//        }
+//
+//    }
+
+    private fun observeAndDisplayCharacters() {
+        lifecycleScope.launch {
+            viewLifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                homeCharacterFragmentViewModel.character.collectLatest { state ->
+
+                    state.data?.let {
+                        shimmerContainer.stopShimmer()
+                        shimmerContainer.visibility = View.GONE
+                        homeCharacterAdapter.submitData(it)
+                        Log.d("Home", "Data is : ${homeCharacterAdapter.snapshot()}")
                     }
-                    is Resource.Success -> {
-                        Log.d("HomeCharacterFragment", "Success")
-                        resources.data?.let { data ->
-                            data.collect {
-                                homeCharacterAdapter.submitData(it)
-                                shimmerContainer.stopShimmer()
-                                shimmerContainer.visibility = View.GONE
-                            }
-                        }
-                    }
-                    is Resource.Error -> {
-                        shimmerContainer.startShimmer()
-                        shimmerContainer.visibility = View.VISIBLE
-                        Log.d("HomeCharacterFragment", "Error")
-                        Toast.makeText(
-                            context,
-                            getString(R.string.check_internet),
-                            Toast.LENGTH_LONG
-                        )
-                            .show()
+                    state.isLoading.let {
+                        shimmerContainer.visibility = if (it) View.VISIBLE else View.GONE
+                        shimmerContainer.stopShimmer()
                     }
                 }
             }
         }
-
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val homeCharacterView =
-            inflater.inflate(R.layout.fragment_home_character, container, false)
-        setUpRecyclerView(homeCharacterView)
-
-        return homeCharacterView
+        _binding = FragmentHomeCharacterBinding.inflate(inflater, container, false)
+        return binding?.root
     }
 
-    private fun setUpRecyclerView(homeCharacterView: View) {
-        homeCharacterRecyclerView =
-            homeCharacterView.findViewById(R.id.homeCharacterRecyclerView)
+    private fun setUpRecyclerView() {
         homeCharacterAdapter = CharacterRecyclerAdapter(this)
-        homeCharacterRecyclerView.apply {
+        binding?.homeCharacterRecyclerView?.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = homeCharacterAdapter
         }
@@ -108,10 +99,12 @@ class HomeCharacterFragment : Fragment(), CharacterItemClick {
     }
 
     private fun navigateToCharacterDetails(disneyCharacterUrl: Bundle) {
-        Navigation.findNavController(homeCharacterRecyclerView).navigate(
-            R.id.action_homeCharacterFragment_to_characterDetailsFragment,
-            disneyCharacterUrl
-        )
+        binding?.let {
+            Navigation.findNavController(it.homeCharacterRecyclerView).navigate(
+                R.id.action_homeCharacterFragment_to_characterDetailsFragment,
+                disneyCharacterUrl
+            )
+        }
     }
 
     private fun passCharacterUrl(character: Character): Bundle {

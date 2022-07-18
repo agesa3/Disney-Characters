@@ -46,8 +46,8 @@ class CharacterRecyclerAdapter(private val characterItemClickListener: Character
 
     inner class CharacterViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView),
         View.OnClickListener {
-        private val characterImage: ImageView = itemView.findViewById(R.id.characterImage)
-        private val characterName: TextView = itemView.findViewById(R.id.characterNameChip)
+        private val characterImage: ImageView = itemView.findViewById(R.id.characterImageHere)
+        private val characterName: TextView = itemView.findViewById(R.id.characterNameText)
 
 
         fun bind(character: Character) {
