@@ -1,5 +1,6 @@
 package com.agesadev.disney.ui.home
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -16,18 +17,51 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeCharacterViewModel @Inject constructor(private val getAllCharactersUseCase: GetAllCharactersUseCase) :
     ViewModel() {
-    private val characterList = MutableLiveData<PagingData<Character>>()
+    private var _characterList = MutableLiveData<PagingData<Character>>()
+    val characterList: LiveData<PagingData<Character>> get() = _characterList
 
-    private val _characters = MutableStateFlow(CharacterState())
-    val characters: StateFlow<CharacterState> = _characters
+    private val _character = MutableStateFlow(CharacterState())
+    val character: StateFlow<CharacterState> get() = _character
 
     init {
-        getCharacters()
+        getAllCharacters()
     }
 
-    fun getCharacters(): Flow<Resource<Flow<PagingData<Character>>>> {
-        return getAllCharactersUseCase()
+    private fun getAllCharacters() {
+        viewModelScope.launch {
+            getAllCharactersUseCase().onEach { result ->
+                when (result) {
+                    is Resource.Loading -> {
+                        _character.value = CharacterState(isLoading = true)
+                    }
+                    is Resource.Success -> {
+//                        Log.d("Home", "Data at viewmodel: ${result.data?.first()}")
+                        _character.value =
+                            CharacterState(isLoading = false, data = result.data?.first())
+                    }
+                    is Resource.Error -> {
+                        _character.value =
+                            CharacterState(isLoading = false, error = result.message ?: "")
+                    }
+                }
+
+            }
+
+        }
     }
 
-    fun characters(): LiveData<PagingData<Character>> = characterList
+//    fun getAllCharacters() {
+//        viewModelScope.launch {
+//            getAllCharactersUseCase().collectLatest { result ->
+//                when (result) {
+//                    is Resource.Success -> {
+//                        _characterList.value = result.data?.first()
+//                    }
+//                }
+//
+//            }
+//        }
+//    }
+
+
 }
